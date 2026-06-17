@@ -21,183 +21,118 @@
         <p class="text-slate-400 text-sm mb-10">Selecciona tu perfil de acceso del ecosistema clínico</p>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-3xl mx-auto">
-            <button onclick="activarRol('paciente')" class="p-5 bg-white rounded-2xl border hover:border-blue-500 transition shadow-xs text-center">
-                <i class="fa-solid fa-user-injured text-3xl text-blue-500 mb-2"></i>
-                <p class="text-xs font-bold text-slate-700">Paciente</p>
-            </button>
-            <button onclick="activarRol('familiar')" class="p-5 bg-white rounded-2xl border hover:border-purple-500 transition shadow-xs text-center">
-                <i class="fa-solid fa-people-roof text-3xl text-purple-500 mb-2"></i>
-                <p class="text-xs font-bold text-slate-700">Familiar</p>
-            </button>
-            <button onclick="activarRol('medico')" class="p-5 bg-white rounded-2xl border hover:border-emerald-500 transition shadow-xs text-center">
-                <i class="fa-solid fa-user-doctor text-3xl text-emerald-500 mb-2"></i>
-                <p class="text-xs font-bold text-slate-700">Médico</p>
-            </button>
-            <button onclick="activarRol('admin')" class="p-5 bg-white rounded-2xl border hover:border-amber-500 transition shadow-xs text-center">
-                <i class="fa-solid fa-crown text-3xl text-amber-500 mb-2"></i>
-                <p class="text-xs font-bold text-slate-700">Admin</p>
-            </button>
+            <button onclick="cambiarPerfil('paciente')" class="bg-white border p-4 rounded-2xl shadow-xs font-bold text-xs text-blue-600 hover:border-blue-500 transition uppercase"><i class="fa-solid fa-user-injured text-lg block mb-1"></i> Paciente</button>
+            <button onclick="cambiarPerfil('medico')" class="bg-white border p-4 rounded-2xl shadow-xs font-bold text-xs text-emerald-600 hover:border-emerald-500 transition uppercase"><i class="fa-solid fa-user-doctor text-lg block mb-1"></i> Médico</button>
+            <button onclick="cambiarPerfil('familiar')" class="bg-white border p-4 rounded-2xl shadow-xs font-bold text-xs text-purple-600 hover:border-purple-500 transition uppercase"><i class="fa-solid fa-users text-lg block mb-1"></i> Familiar</button>
+            <button onclick="cambiarPerfil('admin')" class="bg-white border p-4 rounded-2xl shadow-xs font-bold text-xs text-amber-600 hover:border-amber-500 transition uppercase"><i class="fa-solid fa-crown text-lg block mb-1"></i> Administrador</button>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 max-w-md w-full mx-auto text-left min-h-[200px]">
-            <p id="txt-vacio" class="text-center text-slate-400 text-sm py-10">Elige un rol superior para desplegar el formulario.</p>
+        <div id="panel-paciente" class="form-panel active-panel max-w-md mx-auto bg-white p-6 rounded-3xl border shadow-sm">
+            <div class="flex border-b mb-4">
+                <button onclick="cambiarTabPaciente('login')" class="w-1/2 pb-2 text-xs font-bold uppercase tracking-wider border-b-2 border-blue-500 text-blue-600">Ingresar</button>
+                <button onclick="cambiarTabPaciente('registro')" class="w-1/2 pb-2 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-slate-400">Registrarse</button>
+            </div>
+            
+            <form id="form-paciente-login" class="sub-tab active-tab space-y-4">
+                <input type="email" id="pac-login-correo" placeholder="Correo Electrónico" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="password" id="pac-login-pass" placeholder="Contraseña" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl text-xs font-bold uppercase tracking-wide">Iniciar Sesión</button>
+            </form>
 
-            <div id="panel-paciente" class="form-panel">
-                <div class="flex border-b mb-4">
-                    <button id="btn-tab-paciente-login" onclick="cambiarPestana('paciente', 'login')" class="w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-blue-500 text-blue-600">Iniciar Sesión</button>
-                    <button id="btn-tab-paciente-registro" onclick="cambiarPestana('paciente', 'registro')" class="w-1/2 pb-2 text-xs font-bold text-center text-slate-400">Registrarse</button>
-                </div>
-                <div id="paciente-login" class="sub-tab active-tab">
-                    <form id="form-paciente-login" class="space-y-3">
-                        <input type="email" id="pac-login-correo" required placeholder="Correo electrónico" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
-                        <input type="password" id="pac-login-pass" required placeholder="Contraseña" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
-                        <button type="submit" class="w-full bg-blue-600 text-white p-2.5 rounded-xl font-bold text-xs uppercase">Entrar</button>
-                    </form>
-                </div>
-                <div id="paciente-registro" class="sub-tab">
-                    <form id="form-paciente-registro" class="space-y-2">
-                        <input type="text" id="pac-reg-nombre" required placeholder="Nombre Completo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="pac-reg-cedula" required placeholder="Cédula de Identidad" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="pac-reg-telefono" required placeholder="Teléfono Móvil" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="pac-reg-fijo" placeholder="Teléfono Fijo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="email" id="pac-reg-correo" required placeholder="Correo Electrónico" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="pac-reg-dir" required placeholder="Dirección de Habitación" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="password" id="pac-reg-pass" required placeholder="Contraseña" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="password" id="pac-reg-confpass" required placeholder="Confirmar Contraseña" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded-lg font-bold text-xs uppercase">Crear Cuenta</button>
-                    </form>
-                </div>
+            <form id="form-paciente-registro" class="sub-tab space-y-4">
+                <input type="text" id="pac-reg-nombre" placeholder="Nombre Completo" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="text" id="pac-reg-cedula" placeholder="Cédula de Identidad" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="email" id="pac-reg-correo" placeholder="Correo Electrónico" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="password" id="pac-reg-pass" placeholder="Contraseña" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="text" id="pac-reg-tlf" placeholder="Teléfono Móvil" class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="text" id="pac-reg-dir" placeholder="Dirección de Domicilio" class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl text-xs font-bold uppercase tracking-wide">Crear Cuenta</button>
+            </form>
+        </div>
+
+        <div id="panel-medico" class="form-panel max-w-md mx-auto bg-white p-6 rounded-3xl border shadow-sm">
+            <div class="flex border-b mb-4">
+                <button onclick="cambiarTabMedico('login')" class="w-1/2 pb-2 text-xs font-bold uppercase tracking-wider border-b-2 border-emerald-500 text-emerald-600">Ingresar</button>
+                <button onclick="cambiarTabMedico('registro')" class="w-1/2 pb-2 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-slate-400">Postularse</button>
             </div>
 
-            <div id="panel-familiar" class="form-panel">
-                <div class="flex border-b mb-4">
-                    <button id="btn-tab-familiar-login" onclick="cambiarPestana('familiar', 'login')" class="w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-purple-500 text-purple-600">Ingresar</button>
-                    <button id="btn-tab-familiar-registro" onclick="cambiarPestana('familiar', 'registro')" class="w-1/2 pb-2 text-xs font-bold text-center text-slate-400">Vincular Nuevo</button>
-                </div>
-                <div id="familiar-login" class="sub-tab active-tab">
-                    <form id="form-familiar-login" class="space-y-3">
-                        <input type="email" id="fam-login-correo" required placeholder="Correo de familiar" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
-                        <input type="password" id="fam-login-pass" required placeholder="Contraseña" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
-                        <button type="submit" class="w-full bg-purple-600 text-white p-2.5 rounded-xl font-bold text-xs uppercase">Acceder al Monitor</button>
-                    </form>
-                </div>
-                <div id="familiar-registro" class="sub-tab">
-                    <form id="form-familiar-registro" class="space-y-2">
-                        <input type="text" id="fam-reg-nombre" required placeholder="Su Nombre Completo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="fam-reg-tel" required placeholder="Su Teléfono" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="email" id="fam-reg-correo" required placeholder="Su Correo Electrónico" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="fam-reg-pacnombre" required placeholder="Nombre del Paciente a Monitorear" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="fam-reg-vinculo" required placeholder="Vínculo Familiar (Ej: Tío, Madre)" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="email" id="fam-reg-paccorreo" required placeholder="Correo exacto del Paciente" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="password" id="fam-reg-pass" required placeholder="Asigne una Contraseña" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <button type="submit" class="w-full bg-purple-500 text-white p-2 rounded-lg font-bold text-xs uppercase">Establecer Enlace</button>
-                    </form>
-                </div>
-            </div>
+            <form id="form-medico-login" class="sub-tab active-tab space-y-4">
+                <input type="email" id="med-login-correo" placeholder="Correo Médico Institucional" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="password" id="med-login-pass" placeholder="Contraseña" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <button type="submit" class="w-full bg-emerald-600 text-white p-3 rounded-xl text-xs font-bold uppercase tracking-wide">Entrar al Consultorio</button>
+            </form>
 
-            <div id="panel-medico" class="form-panel">
-                <div class="flex border-b mb-4">
-                    <button id="btn-tab-medico-login" onclick="cambiarPestana('medico', 'login')" class="w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-emerald-500 text-emerald-600">Entrar</button>
-                    <button id="btn-tab-medico-registro" onclick="cambiarPestana('medico', 'registro')" class="w-1/2 pb-2 text-xs font-bold text-center text-slate-400">Postularse</button>
-                </div>
-                <div id="medico-login" class="sub-tab active-tab">
-                    <form id="form-medico-login" class="space-y-3">
-                        <input type="email" id="med-login-correo" required placeholder="Correo Institucional" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
-                        <input type="password" id="med-login-pass" required placeholder="Contraseña" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
-                        <button type="submit" class="w-full bg-emerald-600 text-white p-2.5 rounded-xl font-bold text-xs uppercase">Iniciar Guardia</button>
-                    </form>
-                </div>
-                <div id="medico-registro" class="sub-tab">
-                    <form id="form-medico-registro" class="space-y-2">
-                        <input type="text" id="med-reg-nombre" required placeholder="Nombre Completo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="med-reg-cedula" required placeholder="Cédula / Código MPPS" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="med-reg-tel" required placeholder="Teléfono de Contacto" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="email" id="med-reg-correo" required placeholder="Correo Electrónico" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="med-reg-dir" required placeholder="Dirección Médica o Consultorio" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="password" id="med-reg-pass" required placeholder="Contraseña" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <div class="p-2 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-700">
-                            <i class="fa-solid fa-paperclip mr-1"></i> Título, Cédula y Cursos serán adjuntados automáticamente para revisión del Admin.
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-500 text-white p-2 rounded-lg font-bold text-xs uppercase">Enviar Postulación</button>
-                    </form>
-                </div>
-            </div>
+            <form id="form-medico-registro" class="sub-tab space-y-4">
+                <input type="text" id="med-reg-nombre" placeholder="Nombre y Apellido" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="email" id="med-reg-correo" placeholder="Correo de Contacto" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="password" id="med-reg-pass" placeholder="Contraseña de Acceso" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="text" id="med-reg-esp" placeholder="Especialidad Médica (Ej: Radiólogo, Pediatra)" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <button type="submit" class="w-full bg-emerald-600 text-white p-3 rounded-xl text-xs font-bold uppercase tracking-wide">Enviar Solicitud</button>
+            </form>
+        </div>
 
-            <div id="panel-admin" class="form-panel">
-                <h3 class="text-xs font-black uppercase text-amber-600 mb-3 tracking-wider">Módulo Central Administrativo</h3>
-                <form id="form-admin-login" class="space-y-3">
-                    <input type="password" id="admin-pass" required placeholder="Contraseña de Seguridad Master" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
-                    <button type="submit" class="w-full bg-amber-500 text-white p-2.5 rounded-xl font-bold text-xs uppercase">Acceder</button>
-                </form>
-            </div>
+        <div id="panel-familiar" class="form-panel max-w-md mx-auto bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <h2 class="text-sm font-bold text-purple-700 uppercase tracking-wide">Seguimiento Clínico Familiar</h2>
+            <p class="text-slate-400 text-[11px]">Ingresa la cédula del paciente registrado que deseas monitorear en tiempo real.</p>
+            <form id="form-familiar-acceso" class="space-y-4">
+                <input type="text" id="fam-pac-cedula" placeholder="Cédula del Paciente" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <input type="text" id="fam-nombre" placeholder="Tu Nombre (Parentesco)" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <button type="submit" class="w-full bg-purple-600 text-white p-3 rounded-xl text-xs font-bold uppercase tracking-wide">Vincular Pantalla</button>
+            </form>
+        </div>
 
+        <div id="panel-admin" class="form-panel max-w-md mx-auto bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <h2 class="text-sm font-bold text-amber-600 uppercase tracking-wide">Llave Maestra de Seguridad</h2>
+            <form id="form-admin-login" class="space-y-4">
+                <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" required class="w-full p-3 border rounded-xl text-xs bg-slate-50">
+                <button type="submit" class="w-full bg-amber-500 text-white p-3 rounded-xl text-xs font-bold uppercase tracking-wide">Acceder al Control Central</button>
+            </form>
         </div>
     </div>
 
     <script>
-        function activarRol(rol) {
-            document.getElementById('txt-vacio').style.display = 'none';
+        // Funciones de navegación visual del frontend
+        function cambiarPerfil(perfil) {
             document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active-panel'));
-            document.getElementById('panel-' + rol).classList.add('active-panel');
+            document.getElementById(`panel-${perfil}`).classList.add('active-panel');
+        }
+        function cambiarTabPaciente(tab) {
+            document.querySelectorAll('#panel-paciente .sub-tab').forEach(t => t.classList.remove('active-tab'));
+            if(tab==='login') document.getElementById('form-paciente-login').classList.add('active-tab');
+            else document.getElementById('form-paciente-registro').classList.add('active-tab');
+        }
+        function cambiarTabMedico(tab) {
+            document.querySelectorAll('#panel-medico .sub-tab').forEach(t => t.classList.remove('active-tab'));
+            if(tab==='login') document.getElementById('form-medico-login').classList.add('active-tab');
+            else document.getElementById('form-medico-registro').classList.add('active-tab');
         }
 
-        function cambiarPestana(rol, tipo) {
-            const contenedor = document.getElementById('panel-' + rol);
-            contenedor.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active-tab'));
-            document.getElementById(`${rol}-${tipo}`).classList.add('active-tab');
-
-            const esLogin = (tipo === 'login');
-            const colorClase = rol === 'paciente' ? 'blue' : (rol === 'familiar' ? 'purple' : 'emerald');
-            
-            const btnLogin = document.getElementById(`btn-tab-${rol}-login`);
-            const btnReg = document.getElementById(`btn-tab-${rol}-registro`);
-
-            if(esLogin) {
-                if(btnLogin) btnLogin.className = `w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-${colorClase}-500 text-${colorClase}-600`;
-                if(btnReg) btnReg.className = "w-1/2 pb-2 text-xs font-bold text-center text-slate-400";
-            } else {
-                if(btnReg) btnReg.className = `w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-${colorClase}-500 text-${colorClase}-600`;
-                if(btnLogin) btnLogin.className = "w-1/2 pb-2 text-xs font-bold text-center text-slate-400";
-            }
-        }
-
-        // 1. PACIENTE: REGISTRO
+        // 1. PACIENTES: REGISTRO
         document.getElementById('form-paciente-registro').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const contrasena = document.getElementById('pac-reg-pass').value;
-            const confirmarContrasena = document.getElementById('pac-reg-confpass').value;
-
-            if(contrasena !== confirmarContrasena) {
-                return Swal.fire('Error', 'Las contraseñas no coinciden.', 'error');
-            }
-
-            const bodyData = {
-                nombre: document.getElementById('pac-reg-nombre').value,
-                cedula: document.getElementById('pac-reg-cedula').value,
-                telefonoMovil: document.getElementById('pac-reg-telefono').value,
-                telefonoFijo: document.getElementById('pac-reg-fijo').value,
-                correo: document.getElementById('pac-reg-correo').value,
-                direccion: document.getElementById('pac-reg-dir').value,
-                contrasena,
-                confirmarContrasena
-            };
-
             const response = await fetch('/api/pacientes/registro', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bodyData)
+                body: JSON.stringify({
+                    nombre: document.getElementById('pac-reg-nombre').value,
+                    cedula: document.getElementById('pac-reg-cedula').value,
+                    correo: document.getElementById('pac-reg-correo').value,
+                    contrasena: document.getElementById('pac-reg-pass').value,
+                    telefonoMovil: document.getElementById('pac-reg-tlf').value,
+                    direccion: document.getElementById('pac-reg-dir').value
+                })
             });
             const data = await response.json();
-
             if(data.success) {
-                Swal.fire('¡Felicidades!', 'Tu cuenta ha sido creada. Ingresa ahora.', 'success')
-                    .then(() => cambiarPestana('paciente', 'login'));
+                Swal.fire('¡Registro Exitoso!', 'Ya posees 1 estrella de bienvenida.', 'success').then(() => {
+                    window.location.href = `/paciente-dashboard.html?idPaciente=${data.idPaciente}`;
+                });
             } else {
-                Swal.fire('Error de Registro', data.error || 'No se pudo crear el expediente.', 'error');
+                Swal.fire('Error', 'Este correo ya se encuentra registrado.', 'error');
             }
         });
 
-        // 2. PACIENTE: LOGIN
+        // 2. PACIENTES: LOGIN (REPARADO CON ID EN LA URL)
         document.getElementById('form-paciente-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const response = await fetch('/api/pacientes/login', {
@@ -210,81 +145,32 @@
             });
             const data = await response.json();
             if(data.success) {
-                window.location.href = `/paciente-dashboard.html?id=${data.id}`;
+                // SE AGREGA EL PARÁMETRO EN LA URL PARA EVITAR ERRORES DE EXPEDIENTE VACÍO
+                window.location.href = `/paciente-dashboard.html?idPaciente=${data.idPaciente}`;
             } else {
-                Swal.fire('Acceso Denegado', 'Credenciales inválidas.', 'error');
+                Swal.fire('Error', 'Usuario o contraseña incorrectos.', 'error');
             }
         });
 
-        // 3. FAMILIAR: REGISTRO
-        document.getElementById('form-familiar-registro').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const response = await fetch('/api/familiares/registro', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nombreFamiliar: document.getElementById('fam-reg-nombre').value,
-                    telefonoFamiliar: document.getElementById('fam-reg-tel').value,
-                    correoFamiliar: document.getElementById('fam-reg-correo').value,
-                    nombrePacienteAVer: document.getElementById('fam-reg-pacnombre').value,
-                    vinculo: document.getElementById('fam-reg-vinculo').value,
-                    correoPacienteVinculado: document.getElementById('fam-reg-paccorreo').value,
-                    contrasenaFamiliar: document.getElementById('fam-reg-pass').value
-                })
-            });
-            const data = await response.json();
-            if(data.success) {
-                Swal.fire('Enlace Listo', 'Se vinculó el monitoreo con éxito.', 'success')
-                    .then(() => cambiarPestana('familiar', 'login'));
-            } else {
-                Swal.fire('Error', 'No se pudo establecer el enlace.', 'error');
-            }
-        });
-
-        // 4. FAMILIAR: LOGIN
-        document.getElementById('form-familiar-login').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const response = await fetch('/api/familiares/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    correoFamiliar: document.getElementById('fam-login-correo').value,
-                    contrasenaFamiliar: document.getElementById('fam-login-pass').value
-                })
-            });
-            const data = await response.json();
-            if(data.success) {
-                window.location.href = `/familiar-dashboard.html?idPaciente=${data.idPaciente}&familiar=${encodeURIComponent(data.familiar)}`;
-            } else {
-                Swal.fire('Error', 'Familiar no registrado o clave incorrecta.', 'error');
-            }
-        });
-
-        // 5. MÉDICO: POSTULACIÓN
+        // 3. MÉDICOS: REGISTRO
         document.getElementById('form-medico-registro').addEventListener('submit', async (e) => {
             e.preventDefault();
             const response = await fetch('/api/medicos/registro', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    nombreCompleto: document.getElementById('med-reg-nombre').value,
-                    cedulaProfesional: document.getElementById('med-reg-cedula').value,
-                    telefono: document.getElementById('med-reg-tel').value,
+                    nombre: document.getElementById('med-reg-nombre').value,
                     correo: document.getElementById('med-reg-correo').value,
-                    direccion: document.getElementById('med-reg-dir').value,
-                    contrasena: document.getElementById('med-reg-pass').value
+                    contrasena: document.getElementById('med-reg-pass').value,
+                    especialidad: document.getElementById('med-reg-esp').value
                 })
             });
-            const data = await response.json();
-            if(data.success) {
-                Swal.fire('Postulación Enviada', 'Espera a que el Administrador valide tus credenciales.', 'info')
-                    .then(() => cambiarPestana('medico', 'login'));
-            } else {
-                Swal.fire('Error', 'No se pudo procesar la postulación médica.', 'error');
+            if((await response.json()).success) {
+                Swal.fire('Postulación Enviada', 'Tu solicitud está en revisión por parte de administración.', 'info').then(() => window.location.reload());
             }
         });
 
-        // 6. MÉDICO: LOGIN
+        // 4. MÉDICOS: LOGIN
         document.getElementById('form-medico-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const response = await fetch('/api/medicos/login', {
@@ -297,18 +183,35 @@
             });
             
             if (response.status === 403) {
-                return Swal.fire('Acceso Restringido', 'Tu cuenta médica aún no ha sido autorizada por el administrador.', 'warning');
+                return Swal.fire('Acceso Restringido', 'Tu cuenta médica aún no ha sido aprobada por administración.', 'warning');
             }
             
             const data = await response.json();
             if(data.success) {
                 window.location.href = '/medico-dashboard.html';
             } else {
-                Swal.fire('Error', 'Credenciales inválidas.', 'error');
+                Swal.fire('Error', 'Credenciales médicas inválidas.', 'error');
             }
         });
 
-        // 7. ADMINISTRADOR: LOGIN
+        // 5. FAMILIARES: ACCESO DE VINCULACIÓN
+        document.getElementById('form-familiar-acceso').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cedulaBusqueda = document.getElementById('fam-pac-cedula').value.trim();
+            const familiar = document.getElementById('fam-nombre').value.trim();
+
+            const res = await fetch('/api/admin/pacientes');
+            const pacientes = await res.json();
+            const encontrado = pacientes.find(p => p.cedula === cedulaBusqueda);
+
+            if(encontrado) {
+                window.location.href = `/familiar-dashboard.html?idPaciente=${encontrado._id}&familiar=${encodeURIComponent(familiar)}`;
+            } else {
+                Swal.fire('No encontrado', 'No hay ningún expediente con esa cédula de identidad.', 'error');
+            }
+        });
+
+        // 6. ADMINISTRADOR: LOGIN
         document.getElementById('form-admin-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const response = await fetch('/api/admin/login', {
@@ -322,7 +225,7 @@
             if(data.success) {
                 window.location.href = '/admin.html';
             } else {
-                Swal.fire('Acceso Maestro Fallido', 'Contraseña administrativa incorrecta.', 'error');
+                Swal.fire('Acceso Maestro Fallido', 'Contraseña incorrecta.', 'error');
             }
         });
     </script>

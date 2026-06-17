@@ -62,7 +62,8 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const idPaciente = urlParams.get('id');
+        // CORRECCIÓN: Se lee 'idPaciente' tal como lo envía el index.html
+        const idPaciente = urlParams.get('idPaciente'); 
         let cachePaciente = null;
 
         async function cargarDashboard() {
@@ -111,21 +112,22 @@
             }
         }
 
+        // CORRECCIÓN INTERNA: Conexión real con el backend unificado para descontar estrellas
         async function solicitarConsulta() {
             const sintomas = document.getElementById('txt-sintomas').value.trim();
-            if (!sintomas) return Swal.fire('Error', 'Describe qué sientes por favor.', 'warning');
+            if(!sintomas) return Swal.fire('Atención', 'Por favor describa sus síntomas.', 'warning');
 
-            const res = await fetch('/api/pacientes/solicitar-consulta', {
+            const response = await fetch('/api/pacientes/solicitar-consulta', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idPaciente, sintomas })
             });
-            const data = await res.json();
-
-            if (data.redirigirAPago) {
+            const data = await response.json();
+            
+            if (data.sinEstrellas) {
                 Swal.fire({
-                    title: 'Sin estrellas',
-                    text: 'No te quedan estrellas para consultas. Vamos a la página de pago móvil.',
+                    title: 'Sin Créditos',
+                    text: 'No posees estrellas de consulta disponibles. Procederemos a la sección de recarga.',
                     icon: 'error'
                 }).then(() => window.location.href = `/pago.html?idPaciente=${idPaciente}`);
             } else if (data.success) {
