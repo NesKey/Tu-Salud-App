@@ -9,18 +9,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/**
- * CORRECCIÓN 1: Servir archivos estáticos tanto si están en la raíz 
- * como si están dentro de una carpeta 'public'. Esto evita el "Cannot GET".
- */
+// Servir archivos estáticos con flexibilidad total
 app.use(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, 'public')));
 
-/**
- * CORRECCIÓN 2: Conexión híbrida a MongoDB.
- * En Render usará la variable de entorno MONGODB_URI (su MongoDB Atlas).
- * Si no está configurada, usará la local para que no le dé error en su computadora.
- */
+// Conexión híbrida a MongoDB Atlas (Prioriza la variable de entorno de Render)
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/teleradiologia_db';
 
 mongoose.connect(MONGO_URI)
@@ -78,23 +71,7 @@ const Medico = mongoose.model('Medico', MedicoSchema);
 const Consulta = mongoose.model('Consulta', ConsultaSchema);
 
 // =========================================================================
-// CORRECCIÓN 3: RUTA RAÍZ EXPLÍCITA (Resuelve el Cannot GET / definitivamente)
-// =========================================================================
-app.get('/', (req, res) => {
-    // Intenta enviar el index.html desde la raíz o desde la carpeta public
-    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
-        if (err) {
-            res.sendFile(path.join(__dirname, 'public', 'index.html'), (err2) => {
-                if (err2) {
-                    res.status(404).send('<h1>Error de despliegue: No se encontró el archivo index.html en el repositorio</h1>');
-                }
-            });
-        }
-    });
-});
-
-// =========================================================================
-// OPERACIONES: PACIENTE
+// API ENDPOINTS: OPERACIONES DE PACIENTE
 // =========================================================================
 app.post('/api/pacientes/registro', async (req, res) => {
     const { nombre, cedula, telefonoMovil, telefonoFijo, correo, direccion, contrasena, confirmarContrasena } = req.body;
@@ -129,18 +106,14 @@ app.get('/api/pacientes/datos/:id', async (req, res) => {
     try {
         const paciente = await Paciente.findById(req.params.id).select('-contrasena');
         res.json(paciente);
-    } catch (err) {
-        res.status(500).json(null);
-    }
+    } catch (err) { res.status(500).json(null); }
 });
 
 app.get('/api/pacientes/historial/:id', async (req, res) => {
     try {
         const historial = await Consulta.find({ idPaciente: req.params.id }).sort({ fecha: -1 });
         res.json(historial);
-    } catch (err) {
-        res.status(500).json([]);
-    }
+    } catch (err) { res.status(500).json([]); }
 });
 
 app.post('/api/pacientes/solicitar-consulta', async (req, res) => {
@@ -155,13 +128,11 @@ app.post('/api/pacientes/solicitar-consulta', async (req, res) => {
         pac.sintomasActuales = sintomas;
         await pac.save();
         res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
+    } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
 // =========================================================================
-// OPERACIONES: FAMILIAR
+// API ENDPOINTS: OPERACIONES DE FAMILIAR
 // =========================================================================
 app.post('/api/familiares/registro', async (req, res) => {
     const { nombrePacienteAVer, vinculo, nombreFamiliar, telefonoFamiliar, correoFamiliar, correoPacienteVinculado, contrasenaFamiliar } = req.body;
@@ -176,9 +147,7 @@ app.post('/api/familiares/registro', async (req, res) => {
             { $push: { notificaciones: `Tu familiar ${nombreFamiliar} (${vinculo}) se ha registrado para monitorearte.` } }
         );
         res.json({ success: true, correoFamiliar: nuevoFamiliar.correoFamiliar });
-    } catch (err) {
-        res.status(500).json({ success: false, error: 'Error al registrar al familiar.' });
-    }
+    } catch (err) { res.status(500).json({ success: false, error: 'Error al registrar al familiar.' }); }
 });
 
 app.post('/api/familiares/login', async (req, res) => {
@@ -195,13 +164,11 @@ app.post('/api/familiares/login', async (req, res) => {
         );
         const paciente = await Paciente.findOne({ correo: fam.correoPacienteVinculado });
         res.json({ success: true, idPaciente: paciente._id, familiar: fam.nombreFamiliar });
-    } catch (err) {
-        res.status(500).json({ success: false, error: 'Error en el acceso.' });
-    }
+    } catch (err) { res.status(500).json({ success: false, error: 'Error en el acceso.' }); }
 });
 
 // =========================================================================
-// OPERACIONES: MÉDICO
+// API ENDPOINTS: OPERACIONES DE MÉDICO
 // =========================================================================
 app.post('/api/medicos/registro', async (req, res) => {
     const { nombreCompleto, cedulaProfesional, direccion, telefono, correo, contrasena } = req.body;
@@ -211,9 +178,7 @@ app.post('/api/medicos/registro', async (req, res) => {
         const nuevoMedico = new Medico({ nombreCompleto, cedulaProfesional, direccion, telefono, correo, contrasena: hashClave, autorizado: false });
         await nuevoMedico.save();
         res.json({ success: true, message: 'Postulación enviada.' });
-    } catch (err) {
-        res.status(500).json({ success: false, error: 'Error en la postulación.' });
-    }
+    } catch (err) { res.status(500).json({ success: false, error: 'Error en la postulación.' }); }
 });
 
 app.post('/api/medicos/login', async (req, res) => {
@@ -226,9 +191,7 @@ app.post('/api/medicos/login', async (req, res) => {
         if (!med.autorizado) return res.status(403).json({ success: false, noAutorizado: true });
         
         res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false, error: 'Error de autenticación.' });
-    }
+    } catch (err) { res.status(500).json({ success: false, error: 'Error de autenticación.' }); }
 });
 
 app.post('/api/medicos/atender', async (req, res) => {
@@ -244,13 +207,11 @@ app.post('/api/medicos/atender', async (req, res) => {
         p.sintomasActuales = '';
         await p.save();
         res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
+    } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
 // =========================================================================
-// OPERACIONES: ADMINISTRADOR
+// API ENDPOINTS: OPERACIONES DE ADMINISTRADOR
 // =========================================================================
 app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
@@ -290,6 +251,49 @@ app.post('/api/admin/recargar-estrella', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
-// Render asigna dinámicamente un puerto en la variable process.env.PORT
+// =========================================================================
+// 🔄 NUEVA SECCIÓN CRÍTICA: ENRUTAMIENTO DE PÁGINAS HTML (Evita el 404 de raíz)
+// =========================================================================
+
+// Función auxiliar para despachar los HTML sin importar si están sueltos o en /public
+const servirHTML = (nombreArchivo, res) => {
+    res.sendFile(path.join(__dirname, nombreArchivo), (err) => {
+        if (err) {
+            res.sendFile(path.join(__dirname, 'public', nombreArchivo), (err2) => {
+                if (err2) res.status(404).send(`<h1>404 - El archivo ${nombreArchivo} no existe en el repositorio</h1>`);
+            });
+        }
+    });
+};
+
+// Ruta Raíz (Home / Login)
+app.get('/', (req, res) => servirHTML('index.html', res));
+
+// Panel del Administrador
+app.get('/admin', (req, res) => servirHTML('admin.html', res));
+app.get('/admin.html', (req, res) => servirHTML('admin.html', res));
+
+// Panel de Pacientes
+app.get('/paciente-dashboard', (req, res) => servirHTML('paciente-dashboard.html', res));
+app.get('/paciente-dashboard.html', (req, res) => servirHTML('paciente-dashboard.html', res));
+
+// Panel de Médicos
+app.get('/medico-dashboard', (req, res) => servirHTML('medico-dashboard.html', res));
+app.get('/medico-dashboard.html', (req, res) => servirHTML('medico-dashboard.html', res));
+
+// Panel de Familiares
+app.get('/familiar-dashboard', (req, res) => servirHTML('familiar-dashboard.html', res));
+app.get('/familiar-dashboard.html', (req, res) => servirHTML('familiar-dashboard.html', res));
+
+// Pasarela de Pago
+app.get('/pago', (req, res) => servirHTML('pago.html', res));
+app.get('/pago.html', (req, res) => servirHTML('pago.html', res));
+
+// Captura universal de rutas inválidas (Middleware de cierre)
+app.use((req, res) => {
+    res.status(404).send('<h1>404 - Ruta no encontrada en el sistema NoSQL de la Aplicación</h1>');
+});
+
+// Escucha del Servidor en Render
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Servidor unificado corriendo en el puerto ${PORT}`));
