@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Salud - Pacientes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Motor jspdf para generación de documentos nativos en el cliente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Plus Jakarta Sans', sans-serif; } </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <header class="bg-white border-b py-4 px-6 flex justify-between items-center shadow-xs">
+        <h1 class="text-xl font-extrabold text-blue-600 flex items-center gap-2"><i class="fa-solid fa-notes-medical"></i> Mi Salud Digital</h1>
+        <a href="/" class="text-xs bg-slate-100 hover:bg-red-50 text-slate-600 font-bold px-4 py-2 rounded-xl transition">Salir</a>
+    </header>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Tarjeta de Perfil -->
+        <div class="bg-white p-6 rounded-2xl border shadow-xs text-center h-fit space-y-4">
+            <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full mx-auto flex items-center justify-center text-2xl font-bold"><i class="fa-solid fa-user"></i></div>
+            <div>
+                <h2 id="lbl-nombre" class="text-base font-extrabold text-slate-800">Cargando...</h2>
+                <p id="lbl-correo" class="text-xs text-slate-400"></p>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl border text-left text-xs text-slate-600 font-medium" id="lbl-enfermedad"></div>
+            <div class="bg-amber-50 text-amber-700 text-xs font-bold py-2 rounded-xl" id="lbl-estrellas">⭐ -</div>
+        </div>
+
+        <!-- Consultas e Historial -->
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white p-6 rounded-2xl border shadow-xs space-y-3">
+                <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-comment-medical text-blue-500"></i> Describa sus síntomas</h3>
+                <textarea id="txt-sintomas" rows="3" class="w-full bg-slate-50 border rounded-xl p-3 text-sm focus:outline-none focus:border-blue-500" placeholder="¿Cómo se siente el día de hoy?"></textarea>
+                <div class="flex justify-between items-center border-t pt-2 text-xs">
+                    <span class="text-slate-400 font-bold">Estado:</span>
+                    <span id="lbl-status" class="px-2.5 py-0.5 rounded-full font-black text-[10px] bg-slate-100">Cargando...</span>
+                </div>
+                <button onclick="solicitarConsulta()" id="btn-solicitar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition">Enviar Reporte Clínico</button>
+            </div>
+
+            <!-- HISTORIAL CLÍNICO PERMANENTE CON PDF -->
+            <div class="bg-white p-6 rounded-2xl border shadow-xs space-y-4">
+                <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-clock-history text-amber-500"></i> Historial de Tratamientos Emitidos</h3>
+                <div id="contenedor-historial" class="space-y-3 max-h-72 overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const idPaciente = urlParams.get('id');
+        let cachePaciente = null;
+
+        async function cargarPaciente() {
+            const res = await fetch(`/api/pacientes/datos/${idPaciente}`);
+            cachePaciente = await res.json();
+            
+            document.getElementById('lbl-nombre').innerText = cachePaciente.nombre;
+            document.getElementById('lbl-correo').innerText = cachePaciente.correo;
+            document.getElementById('lbl-enfermedad').innerText = `Antecedente: ${cachePaciente.enfermedad}`;
+            document.getElementById('lbl-estrellas').innerText = `Consultas Disponibles: ⭐ ${cachePaciente.estrellas}`;
+            
+            const status = document.getElementById('lbl-status');
+            status.innerText = cachePaciente.statusConsulta.toUpperCase();
+            
+            if(cachePaciente.statusConsulta === "Esperando") {
+                status.className = "px-2.5 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-700 animate-pulse";
+                document.getElementById('btn-solicitar').disabled = true;
+                document.getElementById('btn-solicitar').className = "w-full bg-slate-100 text-slate-400 font-bold py-2.5 rounded-xl text-sm cursor-not-allowed";
+                document.getElementById('txt-sintomas').disabled = true;
+                document.getElementById('txt-sintomas').value = cachePaciente.sintomasActuales;
+            }
+            cargarHistorial();
+        }
+
+        async function cargarHistorial() {
+            const res = await fetch(`/api/pacientes/historial/${idPaciente}`);
+            const consultas = await res.json();
+            const box = document.getElementById('contenedor-historial');
+            box.innerHTML = "";
+            
+            if(consultas.length === 0) {
+                box.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No posee registros médicos almacenados.</p>`;
+                return;
+            }
+
+            consultas.forEach((c, index) => {
+                const div = document.createElement('div');
+                div.className = "bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-2";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-1">
+                        <span class="text-[10px] font-bold text-slate-400">${new Date(c.fecha).toLocaleString()}</span>
+                        <button onclick="descargarPDF('${btoa(JSON.stringify(c))}')" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"><i class="fa-solid fa-file-arrow-down"></i> Bajar Récipe PDF</button>
+                    </div>
+                    <p class="text-xs text-slate-500"><strong>Síntomas evaluados:</strong> "${c.sintomasReportados}"</p>
+                    <p class="text-xs text-slate-700 font-mono whitespace-pre-line bg-white p-2 rounded border">${c.diagnosticoTratamiento}</p>
+                `;
+                box.appendChild(div);
+            });
+        }
+
+        // MEJORA 4: Compilador de Récipes en PDF Nativo e Institucional
+        function descargarPDF(base64Data) {
+            const { jsPDF } = window.jspdf;
+            const consulta = JSON.parse(atob(base64Data));
+            const doc = new jsPDF();
+
+            // Encabezado Clínico Estético
+            doc.setFillColor(37, 99, 235);
+            doc.rect(0, 0, 220, 25, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.text("SISTEMA DE ASISTENCIA MEDICA TELECLINICA", 14, 16);
+
+            // Cuerpo del Documento
+            doc.setTextColor(51, 65, 85);
+            doc.setFontSize(10);
+            doc.text(`ID CONSULTA: ${consulta._id}`, 14, 35);
+            doc.text(`FECHA EMISION: ${new Date(consulta.fecha).toLocaleString()}`, 14, 41);
+            
+            doc.setLineWidth(0.5);
+            doc.line(14, 46, 196, 46);
+
+            doc.setFontSize(12);
+            doc.text("DATOS DEL PACIENTE", 14, 54);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            doc.text(`Nombre y Apellido: ${cachePaciente.nombre}`, 14, 61);
+            doc.text(`Historia Base / Crónica: ${cachePaciente.enfermedad}`, 14, 67);
+            doc.text(`Cuadro Clínico Evaluado: "${consulta.sintomasReportados}"`, 14, 73);
+
+            doc.line(14, 80, 196, 80);
+
+            // Prescripción
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("PRESCRIPCION Y TRATAMIENTO MEDICO (RP)", 14, 89);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(11);
+            
+            // Ajustar texto largo para evitar desborde en el PDF
+            const lineasTratamiento = doc.splitTextToSize(consulta.diagnosticoTratamiento, 180);
+            doc.text(lineasTratamiento, 14, 98);
+
+            // Sello institucional decorativo simulado
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(156, 163, 175);
+            doc.text("VALIDADO ELECTRÓNICAMENTE - RED DE GUARDIA CENTRAL", 35, 260);
+
+            doc.save(`Recipe_Digital_${cachePaciente.nombre.replace(/\s+/g, '_')}.pdf`);
+        }
+
+        async function solicitarConsulta() {
+            const sintomas = document.getElementById('txt-sintomas').value.trim();
+            if(!sintomas) return Swal.fire('Error', 'Describa sus síntomas.', 'warning');
+
+            document.getElementById('btn-solicitar').disabled = true;
+            document.getElementById('btn-solicitar').innerText = "Procesando...";
+
+            const res = await fetch('/api/pacientes/solicitar-consulta', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idPaciente, sintomas })
+            });
+            const data = await res.json();
+            if(data.success) {
+                Swal.fire('¡Éxito!', 'Síntomas cargados en red.', 'success').then(() => window.location.reload());
+            } else if(data.redirigirAPago) {
+                window.location.href = "/pago.html";
+            }
+        }
+
+        cargarPaciente();
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Clínico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .form-panel { display: none; }
+        .active-panel { display: block; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div class="max-w-4xl w-full text-center">
+        
+        <h1 class="text-2xl font-black text-slate-800 mb-10">Mi Salud Digital</h1>
+
+        <div id="selector-roles" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <button onclick="mostrarFormulario('paciente')" class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:border-blue-400 transition-all group">
+                <i class="fa-solid fa-user-injured text-3xl text-blue-500 mb-3"></i>
+                <p class="text-xs font-bold text-slate-600">Paciente</p>
+            </button>
+            <button onclick="mostrarFormulario('familiar')" class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:border-purple-400 transition-all group">
+                <i class="fa-solid fa-people-roof text-3xl text-purple-500 mb-3"></i>
+                <p class="text-xs font-bold text-slate-600">Familiar</p>
+            </button>
+            <button onclick="mostrarFormulario('medico')" class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:border-emerald-400 transition-all group">
+                <i class="fa-solid fa-user-doctor text-3xl text-emerald-500 mb-3"></i>
+                <p class="text-xs font-bold text-slate-600">Médico</p>
+            </button>
+            <button onclick="mostrarFormulario('admin')" class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:border-amber-400 transition-all group">
+                <i class="fa-solid fa-crown text-3xl text-amber-500 mb-3"></i>
+                <p class="text-xs font-bold text-slate-600">Admin</p>
+            </button>
+        </div>
+
+        <div id="contenedor-formularios" class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 max-w-md mx-auto">
+            
+            <div id="form-paciente" class="form-panel">
+                <h2 class="text-sm font-black mb-4">Acceso Pacientes</h2>
+                <form action="/api/pacientes/login" method="POST" class="space-y-4">
+                    <input type="email" name="correo" placeholder="Correo electrónico" class="w-full p-3 bg-slate-50 rounded-xl text-sm border">
+                    <button class="w-full bg-blue-500 text-white p-3 rounded-xl font-bold text-sm">Entrar</button>
+                </form>
+            </div>
+
+            <div id="form-familiar" class="form-panel">
+                <h2 class="text-sm font-black mb-4">Acceso Familiares</h2>
+                <form action="/api/familiares/login" method="POST" class="space-y-4">
+                    <input type="email" name="correoFamiliar" placeholder="Correo del familiar" class="w-full p-3 bg-slate-50 rounded-xl text-sm border">
+                    <button class="w-full bg-purple-500 text-white p-3 rounded-xl font-bold text-sm">Monitorear</button>
+                </form>
+            </div>
+
+            <div id="form-medico" class="form-panel">
+                <h2 class="text-sm font-black mb-4">Acceso Médico</h2>
+                <form action="/api/medicos/login" method="POST" class="space-y-4">
+                    <input type="text" name="cedula" placeholder="Cédula profesional" class="w-full p-3 bg-slate-50 rounded-xl text-sm border">
+                    <button class="w-full bg-emerald-500 text-white p-3 rounded-xl font-bold text-sm">Iniciar Guardia</button>
+                </form>
+            </div>
+
+            <div id="form-admin" class="form-panel">
+                <h2 class="text-sm font-black mb-4">Acceso Administrativo</h2>
+                <form action="/api/admin/login" method="POST" class="space-y-4">
+                    <input type="email" name="correo" placeholder="Correo de gestión" class="w-full p-3 bg-slate-50 rounded-xl text-sm border">
+                    <button class="w-full bg-amber-500 text-white p-3 rounded-xl font-bold text-sm">Ingresar al Panel</button>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        function mostrarFormulario(tipo) {
+            // Ocultar todos
+            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active-panel'));
+            // Mostrar el seleccionado
+            document.getElementById('form-' + tipo).classList.add('active-panel');
+        }
+    </script>
+</body>
+</html>

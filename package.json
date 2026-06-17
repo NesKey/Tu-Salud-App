@@ -1,0 +1,13 @@
+{
+  "name": "mi-salud-app",
+  "version": "1.0.0",
+  "description": "Sistema modular de base de datos para la materia de computacion",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.2.0"
+  }
+}
