@@ -58,7 +58,7 @@
                     <form id="form-paciente-registro" class="space-y-2">
                         <input type="text" id="pac-reg-nombre" required placeholder="Nombre Completo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
                         <input type="text" id="pac-reg-cedula" required placeholder="Cédula de Identidad" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
-                        <input type="text" id="pac-reg-movil" required placeholder="Teléfono Móvil" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" id="pac-reg-telefono" required placeholder="Teléfono Móvil" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
                         <input type="text" id="pac-reg-fijo" placeholder="Teléfono Fijo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
                         <input type="email" id="pac-reg-correo" required placeholder="Correo Electrónico" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
                         <input type="text" id="pac-reg-dir" required placeholder="Dirección de Habitación" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
@@ -135,7 +135,6 @@
     </div>
 
     <script>
-        // Lógica visual básica de las pestañas
         function activarRol(rol) {
             document.getElementById('txt-vacio').style.display = 'none';
             document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active-panel'));
@@ -147,7 +146,6 @@
             contenedor.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active-tab'));
             document.getElementById(`${rol}-${tipo}`).classList.add('active-tab');
 
-            // Actualizar estilo visual de los botones de pestañas
             const esLogin = (tipo === 'login');
             const colorClase = rol === 'paciente' ? 'blue' : (rol === 'familiar' ? 'purple' : 'emerald');
             
@@ -155,17 +153,13 @@
             const btnReg = document.getElementById(`btn-tab-${rol}-registro`);
 
             if(esLogin) {
-                btnLogin.className = `w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-${colorClase}-500 text-${colorClase}-600`;
-                btnReg.className = "w-1/2 pb-2 text-xs font-bold text-center text-slate-400";
+                if(btnLogin) btnLogin.className = `w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-${colorClase}-500 text-${colorClase}-600`;
+                if(btnReg) btnReg.className = "w-1/2 pb-2 text-xs font-bold text-center text-slate-400";
             } else {
-                btnReg.className = `w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-${colorClase}-500 text-${colorClase}-600`;
-                btnLogin.className = "w-1/2 pb-2 text-xs font-bold text-center text-slate-400";
+                if(btnReg) btnReg.className = `w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-${colorClase}-500 text-${colorClase}-600`;
+                if(btnLogin) btnLogin.className = "w-1/2 pb-2 text-xs font-bold text-center text-slate-400";
             }
         }
-
-        // =========================================================================
-        // CONTROL INTERNO DE ENVIOS MEDIANTE FETCH (EVITA LA RECARGA CHIMBA)
-        // =========================================================================
 
         // 1. PACIENTE: REGISTRO
         document.getElementById('form-paciente-registro').addEventListener('submit', async (e) => {
@@ -180,7 +174,7 @@
             const bodyData = {
                 nombre: document.getElementById('pac-reg-nombre').value,
                 cedula: document.getElementById('pac-reg-cedula').value,
-                telefonoMovil: document.getElementById('pac-reg-movil').value,
+                telefonoMovil: document.getElementById('pac-reg-telefono').value,
                 telefonoFijo: document.getElementById('pac-reg-fijo').value,
                 correo: document.getElementById('pac-reg-correo').value,
                 direccion: document.getElementById('pac-reg-dir').value,
