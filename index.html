@@ -3,82 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Clínico</title>
+    <title>Acceso Seguro - Mi Salud Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         .form-panel { display: none; }
-        .active-panel { display: block; }
+        .active-panel { display: block !important; }
+        .sub-tab { display: none; }
+        .active-tab { display: block !important; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans min-h-screen flex flex-col items-center justify-center p-6">
+<body class="bg-slate-50 font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="max-w-4xl w-full text-center">
-        
-        <h1 class="text-2xl font-black text-slate-800 mb-10">Mi Salud Digital</h1>
+        <h1 class="text-3xl font-black text-slate-800 mb-2">Mi Salud Digital</h1>
+        <p class="text-slate-400 text-sm mb-10">Selecciona tu perfil de acceso del ecosistema clínico</p>
 
-        <div id="selector-roles" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            <button onclick="mostrarFormulario('paciente')" class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:border-blue-400 transition-all group">
-                <i class="fa-solid fa-user-injured text-3xl text-blue-500 mb-3"></i>
-                <p class="text-xs font-bold text-slate-600">Paciente</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-3xl mx-auto">
+            <button onclick="activarRol('paciente')" class="p-5 bg-white rounded-2xl border hover:border-blue-500 transition shadow-xs text-center">
+                <i class="fa-solid fa-user-injured text-3xl text-blue-500 mb-2"></i>
+                <p class="text-xs font-bold text-slate-700">Paciente</p>
             </button>
-            <button onclick="mostrarFormulario('familiar')" class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:border-purple-400 transition-all group">
-                <i class="fa-solid fa-people-roof text-3xl text-purple-500 mb-3"></i>
-                <p class="text-xs font-bold text-slate-600">Familiar</p>
+            <button onclick="activarRol('familiar')" class="p-5 bg-white rounded-2xl border hover:border-purple-500 transition shadow-xs text-center">
+                <i class="fa-solid fa-people-roof text-3xl text-purple-500 mb-2"></i>
+                <p class="text-xs font-bold text-slate-700">Familiar</p>
             </button>
-            <button onclick="mostrarFormulario('medico')" class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:border-emerald-400 transition-all group">
-                <i class="fa-solid fa-user-doctor text-3xl text-emerald-500 mb-3"></i>
-                <p class="text-xs font-bold text-slate-600">Médico</p>
+            <button onclick="activarRol('medico')" class="p-5 bg-white rounded-2xl border hover:border-emerald-500 transition shadow-xs text-center">
+                <i class="fa-solid fa-user-doctor text-3xl text-emerald-500 mb-2"></i>
+                <p class="text-xs font-bold text-slate-700">Médico</p>
             </button>
-            <button onclick="mostrarFormulario('admin')" class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:border-amber-400 transition-all group">
-                <i class="fa-solid fa-crown text-3xl text-amber-500 mb-3"></i>
-                <p class="text-xs font-bold text-slate-600">Admin</p>
+            <button onclick="activarRol('admin')" class="p-5 bg-white rounded-2xl border hover:border-amber-500 transition shadow-xs text-center">
+                <i class="fa-solid fa-crown text-3xl text-amber-500 mb-2"></i>
+                <p class="text-xs font-bold text-slate-700">Admin</p>
             </button>
         </div>
 
-        <div id="contenedor-formularios" class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 max-w-md mx-auto">
-            
-            <div id="form-paciente" class="form-panel">
-                <h2 class="text-sm font-black mb-4">Acceso Pacientes</h2>
-                <form action="/api/pacientes/login" method="POST" class="space-y-4">
-                    <input type="email" name="correo" placeholder="Correo electrónico" class="w-full p-3 bg-slate-50 rounded-xl text-sm border">
-                    <button class="w-full bg-blue-500 text-white p-3 rounded-xl font-bold text-sm">Entrar</button>
+        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 max-w-md w-full mx-auto text-left min-h-[200px]">
+            <p id="txt-vacio" class="text-center text-slate-400 text-sm py-10">Elige un rol superior para desplegar el formulario.</p>
+
+            <div id="panel-paciente" class="form-panel">
+                <div class="flex border-b mb-4">
+                    <button onclick="cambiarPestana('paciente', 'login')" class="w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-blue-500 text-blue-600">Iniciar Sesión</button>
+                    <button onclick="cambiarPestana('paciente', 'registro')" class="w-1/2 pb-2 text-xs font-bold text-center text-slate-400">Registrarse</button>
+                </div>
+                <div id="paciente-login" class="sub-tab active-tab">
+                    <form action="/api/pacientes/login" method="POST" class="space-y-3">
+                        <input type="email" name="correo" required placeholder="Correo electrónico" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
+                        <input type="password" name="contrasena" required placeholder="Contraseña" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
+                        <button class="w-full bg-blue-600 text-white p-2.5 rounded-xl font-bold text-xs uppercase">Entrar</button>
+                    </form>
+                </div>
+                <div id="paciente-registro" class="sub-tab">
+                    <form action="/api/pacientes/registro" method="POST" class="space-y-2">
+                        <input type="text" name="nombre" required placeholder="Nombre Completo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="cedula" required placeholder="Cédula de Identidad" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="telefonoMovil" required placeholder="Teléfono Móvil" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="telefonoFijo" placeholder="Teléfono Fijo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="email" name="correo" required placeholder="Correo Electrónico" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="direccion" required placeholder="Dirección de Habitación" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="password" name="contrasena" required placeholder="Contraseña" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="password" name="confirmarContrasena" required placeholder="Confirmar Contraseña" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <button class="w-full bg-blue-500 text-white p-2 rounded-lg font-bold text-xs uppercase">Crear Cuenta</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="panel-familiar" class="form-panel">
+                <div class="flex border-b mb-4">
+                    <button onclick="cambiarPestana('familiar', 'login')" class="w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-purple-500 text-purple-600">Ingresar</button>
+                    <button onclick="cambiarPestana('familiar', 'registro')" class="w-1/2 pb-2 text-xs font-bold text-center text-slate-400">Vincular Nuevo</button>
+                </div>
+                <div id="familiar-login" class="sub-tab active-tab">
+                    <form action="/api/familiares/login" method="POST" class="space-y-3">
+                        <input type="email" name="correoFamiliar" required placeholder="Correo de familiar" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
+                        <input type="password" name="contrasenaFamiliar" required placeholder="Contraseña" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
+                        <button class="w-full bg-purple-600 text-white p-2.5 rounded-xl font-bold text-xs uppercase">Acceder al Monitor</button>
+                    </form>
+                </div>
+                <div id="familiar-registro" class="sub-tab">
+                    <form action="/api/familiares/registro" method="POST" class="space-y-2">
+                        <input type="text" name="nombreFamiliar" required placeholder="Su Nombre Completo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="telefonoFamiliar" required placeholder="Su Teléfono" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="email" name="correoFamiliar" required placeholder="Su Correo Electrónico" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="nombrePacienteAVer" required placeholder="Nombre del Paciente a Monitorear" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="vinculo" required placeholder="Vínculo Familiar (Ej: Tío, Madre)" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="email" name="correoPacienteVinculado" required placeholder="Correo exacto del Paciente" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="password" name="contrasenaFamiliar" required placeholder="Asigne una Contraseña" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <button class="w-full bg-purple-500 text-white p-2 rounded-lg font-bold text-xs uppercase">Establecer Enlace</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="panel-medico" class="form-panel">
+                <div class="flex border-b mb-4">
+                    <button onclick="cambiarPestana('medico', 'login')" class="w-1/2 pb-2 text-xs font-bold text-center border-b-2 border-emerald-500 text-emerald-600">Entrar</button>
+                    <button onclick="cambiarPestana('medico', 'registro')" class="w-1/2 pb-2 text-xs font-bold text-center text-slate-400">Postularse</button>
+                </div>
+                <div id="medico-login" class="sub-tab active-tab">
+                    <form action="/api/medicos/login" method="POST" class="space-y-3">
+                        <input type="email" name="correo" required placeholder="Correo Institucional" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
+                        <input type="password" name="contrasena" required placeholder="Contraseña" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
+                        <button class="w-full bg-emerald-600 text-white p-2.5 rounded-xl font-bold text-xs uppercase">Iniciar Guardia</button>
+                    </form>
+                </div>
+                <div id="medico-registro" class="sub-tab">
+                    <form action="/api/medicos/registro" method="POST" class="space-y-2">
+                        <input type="text" name="nombreCompleto" required placeholder="Nombre Completo" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="cedulaProfesional" required placeholder="Cédula / Código MPPS" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="telefono" required placeholder="Teléfono de Contacto" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="email" name="correo" required placeholder="Correo Electrónico" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="text" name="direccion" required placeholder="Dirección Médica o Consultorio" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <input type="password" name="contrasena" required placeholder="Contraseña" class="w-full p-2 bg-slate-50 border rounded-lg text-xs">
+                        <div class="p-2 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-700">
+                            <i class="fa-solid fa-paperclip mr-1"></i> Título, Cédula y Cursos serán adjuntados automáticamente para revisión del Admin.
+                        </div>
+                        <button class="w-full bg-emerald-500 text-white p-2 rounded-lg font-bold text-xs uppercase">Enviar Postulación</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="panel-admin" class="form-panel">
+                <h3 class="text-xs font-black uppercase text-amber-600 mb-3 tracking-wider">Módulo Central Administrativo</h3>
+                <form action="/api/admin/login" method="POST" class="space-y-3">
+                    <input type="password" name="password" required placeholder="Contraseña de Seguridad Master" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
+                    <button class="w-full bg-amber-500 text-white p-2.5 rounded-xl font-bold text-xs uppercase">Acceder</button>
                 </form>
             </div>
 
-            <div id="form-familiar" class="form-panel">
-                <h2 class="text-sm font-black mb-4">Acceso Familiares</h2>
-                <form action="/api/familiares/login" method="POST" class="space-y-4">
-                    <input type="email" name="correoFamiliar" placeholder="Correo del familiar" class="w-full p-3 bg-slate-50 rounded-xl text-sm border">
-                    <button class="w-full bg-purple-500 text-white p-3 rounded-xl font-bold text-sm">Monitorear</button>
-                </form>
-            </div>
-
-            <div id="form-medico" class="form-panel">
-                <h2 class="text-sm font-black mb-4">Acceso Médico</h2>
-                <form action="/api/medicos/login" method="POST" class="space-y-4">
-                    <input type="text" name="cedula" placeholder="Cédula profesional" class="w-full p-3 bg-slate-50 rounded-xl text-sm border">
-                    <button class="w-full bg-emerald-500 text-white p-3 rounded-xl font-bold text-sm">Iniciar Guardia</button>
-                </form>
-            </div>
-
-            <div id="form-admin" class="form-panel">
-                <h2 class="text-sm font-black mb-4">Acceso Administrativo</h2>
-                <form action="/api/admin/login" method="POST" class="space-y-4">
-                    <input type="email" name="correo" placeholder="Correo de gestión" class="w-full p-3 bg-slate-50 rounded-xl text-sm border">
-                    <button class="w-full bg-amber-500 text-white p-3 rounded-xl font-bold text-sm">Ingresar al Panel</button>
-                </form>
-            </div>
-            
         </div>
     </div>
 
     <script>
-        function mostrarFormulario(tipo) {
-            // Ocultar todos
+        function activarRol(rol) {
+            document.getElementById('txt-vacio').style.display = 'none';
             document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active-panel'));
-            // Mostrar el seleccionado
-            document.getElementById('form-' + tipo).classList.add('active-panel');
+            document.getElementById('panel-' + rol).classList.add('active-panel');
+        }
+        function cambiarPestana(rol, tipo) {
+            const contenedor = document.getElementById('panel-' + rol);
+            contenedor.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active-tab'));
+            document.getElementById(`${rol}-${tipo}`).classList.add('active-tab');
         }
     </script>
 </body>

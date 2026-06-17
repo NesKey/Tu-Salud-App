@@ -3,48 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo Familiar - Mi Salud</title>
+    <title>Monitoreo Familiar Seguro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <!-- Header con el Botón de Salida para el Familiar -->
-    <header class="bg-white border-b-4 border-red-600 py-4 px-6 flex justify-between items-center shadow-sm">
-        <h1 class="text-xl font-extrabold text-red-600"><i class="fa-solid fa-house-user mr-2"></i> Módulo de Monitoreo Familiar</h1>
-        <a href="/" class="bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 font-bold text-xs px-4 py-2 rounded-lg border shadow-sm transition">
-            <i class="fa-solid fa-right-from-bracket mr-1"></i> Salir del Sistema
-        </a>
+    <header class="bg-white border-b py-4 px-6 flex justify-between items-center shadow-xs">
+        <h1 class="text-lg font-black text-purple-700"><i class="fa-solid fa-house-user mr-1"></i> Portal de Acompañamiento Familiar</h1>
+        <span id="txt-familiar" class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">Familiar Activo</span>
     </header>
 
-    <main class="flex-grow max-w-2xl mx-auto px-4 py-8 w-full space-y-6">
-        <!-- Saludo al Familiar -->
-        <div class="bg-white p-6 rounded-xl border shadow-sm">
-            <h2 id="lbl-saludo" class="text-lg font-bold text-slate-700">Bienvenido, Familiar</h2>
-            <p class="text-xs text-slate-400 mt-1">Usted tiene derechos de visualización NoSQL sobre el historial clínico de su paciente vinculado.</p>
-        </div>
-
-        <!-- Ficha Técnica del Paciente Clínico -->
-        <div class="bg-white p-6 rounded-xl border shadow-sm space-y-3">
-            <h3 class="text-sm font-extrabold text-slate-500 uppercase tracking-wider border-b pb-2"><i class="fa-solid fa-file-medical-sheet mr-1"></i> Expediente Clínico del Paciente</h3>
-            <p class="text-sm text-slate-700"><span class="font-bold text-slate-500">Nombre del Paciente:</span> <span id="lbl-paciente-nombre" class="font-semibold text-slate-800">Cargando...</span></p>
-            <p class="text-sm text-slate-700"><span class="font-bold text-slate-500">Patología Crónica:</span> <span id="lbl-paciente-enfermedad" class="text-slate-800">Cargando...</span></p>
-            <p class="text-sm text-slate-700"><span class="font-bold text-slate-500">Último Estatus de Consulta:</span> <span id="lbl-paciente-status" class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100">Ninguno</span></p>
-        </div>
-
-        <!-- Vista de Tratamiento / Récipes del Paciente -->
-        <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-            <h3 class="text-md font-bold text-slate-700"><i class="fa-solid fa-prescription text-red-500 mr-1"></i> Indicaciones Médicas Recientes</h3>
+    <main class="flex-grow max-w-2xl w-full mx-auto p-6 space-y-6">
+        <div class="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Datos Clínicos del Paciente Vinculado</h2>
             
-            <div id="box-sin-recipe" class="hidden text-center py-6 text-slate-400 text-sm">
-                <i class="fa-solid fa-circle-info block text-2xl mb-2 text-slate-300"></i> El especialista no ha emitido récipes para este paciente en las últimas horas.
+            <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border text-xs">
+                <div>
+                    <span class="text-slate-400 block">Nombre del Pariente:</span>
+                    <strong id="lbl-nombre" class="text-sm text-slate-700">-</strong>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Estatus Actual en Red:</span>
+                    <span id="lbl-status" class="inline-block mt-0.5 px-2 py-0.5 rounded-md font-bold bg-slate-200 text-slate-600">Buscando...</span>
+                </div>
             </div>
 
-            <div id="box-con-recipe" class="hidden space-y-3 bg-slate-50 p-4 rounded-lg border-l-4 border-emerald-500">
-                <p id="lbl-recipe-texto" class="text-sm text-slate-700 font-medium bg-white p-3 rounded border border-slate-200 shadow-inner"></p>
-                <a id="lnk-recipe-adjunto" href="#" target="_blank" class="inline-block bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-3 py-2 rounded transition">
-                    <i class="fa-solid fa-image mr-1"></i> Descargar Documento / Récipe Digitalizado
-                </a>
+            <div class="space-y-2">
+                <h3 class="text-xs font-bold text-slate-500"><i class="fa-solid fa-file-medical-alt text-purple-500 mr-1"></i> Último Tratamiento Registrado por el Médico:</h3>
+                <div id="box-receta" class="p-4 bg-purple-50/50 border border-purple-100 rounded-2xl text-xs text-purple-900 font-medium min-h-[60px]">
+                    No hay diagnósticos cargados hoy en el expediente NoSQL.
+                </div>
             </div>
         </div>
     </main>
@@ -52,36 +40,34 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const idPaciente = urlParams.get('idPaciente');
-        const nombreFamiliar = urlParams.get('familiar');
+        const familiarNombre = urlParams.get('familiar');
 
-        document.getElementById('lbl-saludo').innerText = `👋 Hola, ${nombreFamiliar}`;
-
-        async function cargarResultadosPaciente() {
-            try {
-                const res = await fetch(`/api/pacientes/datos/${idPaciente}`);
-                const p = await res.json();
-
-                document.getElementById('lbl-paciente-nombre').innerText = p.nombre;
-                document.getElementById('lbl-paciente-enfermedad').innerText = p.enfermedad;
-                
-                const statusSpan = document.getElementById('lbl-paciente-status');
-                statusSpan.innerText = p.statusConsulta.toUpperCase();
-                if(p.statusConsulta === 'Atendido') statusSpan.className = "px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800";
-                if(p.statusConsulta === 'Esperando') statusSpan.className = "px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 animate-pulse";
-
-                if (p.recipePendiente) {
-                    document.getElementById('box-con-recipe').classList.remove('hidden');
-                    document.getElementById('lbl-recipe-texto').innerText = p.recipePendiente;
-                    document.getElementById('lnk-recipe-adjunto').href = p.adjuntoRecipe;
-                } else {
-                    document.getElementById('box-sin-recipe').classList.remove('hidden');
-                }
-            } catch (err) {
-                alert("Error de conexión al cargar el expediente.");
-            }
+        if(familiarNombre) {
+            document.getElementById('txt-familiar').innerText = `Monitor: ${decodeURIComponent(familiarNombre)}`;
         }
 
-        cargarResultadosPaciente();
+        async function cargarExpediente() {
+            if(!idPaciente) return;
+            const resPac = await fetch(`/api/pacientes/datos/${idPaciente}`);
+            const p = await resPac.json();
+
+            if(p) {
+                document.getElementById('lbl-nombre').innerText = p.nombre;
+                
+                const st = document.getElementById('lbl-status');
+                st.innerText = p.statusConsulta.toUpperCase();
+                if(p.statusConsulta === 'Atendido') st.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800";
+                if(p.statusConsulta === 'Esperando') st.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 animate-pulse";
+
+                // Consultar receta reciente en el historial
+                const resHist = await fetch(`/api/pacientes/historial/${idPaciente}`);
+                const h = await resHist.json();
+                if(h && h.length > 0) {
+                    document.getElementById('box-receta').innerText = h[0].diagnosticoTratamiento;
+                }
+            }
+        }
+        cargarExpediente();
     </script>
 </body>
 </html>

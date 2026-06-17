@@ -1,88 +1,237 @@
-    const express = require('express');
-const app = express();
+const express = require('express');
+const mongoose = require('mongoose');
 const path = require('path');
 
-// =========================================================================
-// MIDDLEWARES CRÍTICOS (Obligatorios para procesar los datos de los formularios)
-// =========================================================================
+const app = express();
+
+// Middlewares obligatorios para procesar formularios y archivos estáticos
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Servir los archivos estáticos de la carpeta public (donde está tu index.html)
-app.use(express.static(path.join(__dirname)));
+// Conexión limpia a MongoDB
+mongoose.connect('mongodb://127.0.0.1:27017/teleradiologia_db')
+    .then(() => console.log('✅ Conectado a MongoDB (Sistema Clínico Integral)'))
+    .catch(err => console.error('❌ Error de conexión NoSQL:', err));
 
 // =========================================================================
-// RUTAS DE LA COLUMNA 1: PACIENTES (REGISTRO Y LOGIN)
+// MODELOS DE BASE DE DATOS (NoSQL Mongoose)
 // =========================================================================
 
-// 1. Registro de Paciente
-app.post('/api/pacientes/registro', (req, res) => {
-    const { nombre, correo, enfermedad } = req.body;
-    
-    // Aquí va tu lógica NoSQL para guardar el registro
-    console.log(`[NoSQL] Registrando paciente: ${nombre} | Correo: ${correo} | Condición: ${enfermedad}`);
-    
-    // Redirección segura para que el navegador no se quede en blanco o texto plano
-    // Reemplaza '/paciente-dashboard.html' por la ruta real de tu interfaz de usuario
-    res.redirect('/paciente-dashboard.html'); 
+const PacienteSchema = new mongoose.Schema({
+    nombre: String,
+    cedula: String,
+    telefonoMovil: String,
+    telefonoFijo: String,
+    correo: { type: String, unique: true },
+    direccion: String,
+    contrasena: String,
+    estrellas: { type: Number, default: 1 }, // Comienza con 1 estrella de cortesía
+    statusConsulta: { type: String, default: 'Ninguno' },
+    sintomasActuales: { type: String, default: '' },
+    notificaciones: [String] // Array para almacenar avisos como: "Tío pablo ha visto tu historial."
 });
 
-// 2. Login de Paciente
-app.post('/api/pacientes/login', (req, res) => {
-    const { correo } = req.body;
+const FamiliarSchema = new mongoose.Schema({
+    nombrePacienteAVer: String,
+    vinculo: String,
+    nombreFamiliar: String,
+    telefonoFamiliar: String,
+    correoFamiliar: { type: String, unique: true },
+    correoPacienteVinculado: String,
+    contrasenaFamiliar: String
+});
+
+const MedicoSchema = new mongoose.Schema({
+    nombreCompleto: String,
+    cedulaProfesional: String,
+    direccion: String,
+    telefono: String,
+    correo: { type: String, unique: true },
+    contrasena: String,
+    autorizado: { type: Boolean, default: false }, // Lo autoriza el Administrador
+    documentosAdjuntos: { type: [String], default: ["Titulo.jpg", "Cedula.jpg"] } // Simulación de archivos cargados
+});
+
+const ConsultaSchema = new mongoose.Schema({
+    idPaciente: mongoose.Schema.Types.ObjectId,
+    sintomasReportados: String,
+    diagnosticoTratamiento: String,
+    fecha: { type: Date, default: Date.now }
+});
+
+const Paciente = mongoose.model('Paciente', PacienteSchema);
+const Familiar = mongoose.model('Familiar', FamiliarSchema);
+const Medico = mongoose.model('Medico', MedicoSchema);
+const Consulta = mongoose.model('Consulta', ConsultaSchema);
+
+// =========================================================================
+// OPERACIONES DEL ROL: PACIENTE
+// =========================================================================
+
+// Registro de Paciente
+app.post('/api/pacientes/registro', async (req, res) => {
+    const { nombre, cedula, telefonoMovil, telefonoFijo, correo, direccion, contrasena, confirmarContrasena } = req.body;
     
-    console.log(`[NoSQL] Intento de ingreso de paciente: ${correo}`);
-    
-    // Lógica de verificación...
-    res.redirect('/paciente-dashboard.html');
+    if (contrasena !== confirmarContrasena) {
+        return res.status(400).send('<h1>Error: Las contraseñas no coinciden. Reintente.</h1>');
+    }
+
+    try {
+        const nuevoPaciente = new Paciente({ nombre, cedula, telefonoMovil, telefonoFijo, correo, direccion, contrasena });
+        await nuevoPaciente.save();
+        res.redirect(`/paciente-dashboard.html?id=${nuevoPaciente._id}`);
+    } catch (err) {
+        res.status(500).send('Error al registrar el paciente o el correo ya existe.');
+    }
+});
+
+// Login de Paciente
+app.post('/api/pacientes/login', async (req, res) => {
+    const { correo, contrasena } = req.body;
+    try {
+        const paciente = await Paciente.findOne({ correo, contrasena });
+        if (!paciente) return res.status(401).send('<h1>Credenciales incorrectas</h1>');
+        res.redirect(`/paciente-dashboard.html?id=${paciente._id}`);
+    } catch (err) {
+        res.status(500).send('Error en el servidor.');
+    }
+});
+
+// Endpoint para traer los datos del Paciente y sus notificaciones en tiempo real
+app.get('/api/pacientes/datos/:id', async (req, res) => {
+    try {
+        const paciente = await Paciente.findById(req.params.id);
+        res.json(paciente);
+    } catch (err) {
+        res.status(500).json(null);
+    }
 });
 
 // =========================================================================
-// RUTAS DE LA COLUMNA 2: FAMILIARES (VINCULACIÓN CLÍNICA)
+// OPERACIONES DEL ROL: FAMILIAR (CON ENVÍO DE NOTIFICACIONES AL PACIENTE)
 // =========================================================================
 
-// 3. Registro y Vinculación de Familiar
-app.post('/api/familiares/registro', (req, res) => {
-    const { nombreFamiliar, correoFamiliar, correoPacienteVinculado } = req.body;
-    
-    console.log(`[NoSQL] Enlazando Familiar: ${nombreFamiliar} con Paciente: ${correoPacienteVinculado}`);
-    
-    // Lógica de vinculación en tu base de datos...
-    res.redirect('/familiar-dashboard.html');
+// Registro de Familiar
+app.post('/api/familiares/registro', async (req, res) => {
+    const { nombrePacienteAVer, vinculo, nombreFamiliar, telefonoFamiliar, correoFamiliar, correoPacienteVinculado, contrasenaFamiliar } = req.body;
+    try {
+        const nuevoFamiliar = new Familiar({ nombrePacienteAVer, vinculo, nombreFamiliar, telefonoFamiliar, correoFamiliar, correoPacienteVinculado, contrasenaFamiliar });
+        await nuevoFamiliar.save();
+        
+        // Disparar alerta en el expediente del Paciente
+        await Paciente.findOneAndUpdate(
+            { correo: correoPacienteVinculado },
+            { $push: { notificaciones: `Tu familiar ${nombreFamiliar} (${vinculo}) se ha registrado para monitorearte.` } }
+        );
+
+        res.redirect(`/familiar-dashboard.html?correoFamiliar=${nuevoFamiliar.correoFamiliar}`);
+    } catch (err) {
+        res.status(500).send('Error en el registro del familiar.');
+    }
 });
 
-// 4. Login de Familiar
-app.post('/api/familiares/login', (req, res) => {
-    const { correoFamiliar } = req.body;
-    
-    console.log(`[NoSQL] Acceso de monitor familiar: ${correoFamiliar}`);
-    
-    res.redirect('/familiar-dashboard.html');
+// Login de Familiar (Envía notificación inmediata al ingresar)
+app.post('/api/familiares/login', async (req, res) => {
+    const { correoFamiliar, contrasenaFamiliar } = req.body;
+    try {
+        const fam = await Familiar.findOne({ correoFamiliar, contrasenaFamiliar });
+        if (!fam) return res.status(401).send('<h1>Familiar no registrado o clave errónea</h1>');
+        
+        // Notificar en tiempo real al paciente vinculado
+        await Paciente.findOneAndUpdate(
+            { correo: fam.correoPacienteVinculado },
+            { $push: { notificaciones: `${fam.vinculo} ${fam.nombreFamiliar} ha visto tu historial.` } }
+        );
+
+        const paciente = await Paciente.findOne({ correo: fam.correoPacienteVinculado });
+        res.redirect(`/familiar-dashboard.html?idPaciente=${paciente._id}&familiar=${encodeURIComponent(fam.nombreFamiliar)}`);
+    } catch (err) {
+        res.status(500).send('Error en el acceso.');
+    }
 });
 
 // =========================================================================
-// RUTAS DE LA COLUMNA 3: PERSONAL MÉDICO
+// OPERACIONES DEL ROL: MÉDICO (REGISTRO SUJETO A AUTORIZACIÓN)
 // =========================================================================
 
-// 5. Login de Médico de Guardia
-app.post('/api/medicos/login', (req, res) => {
-    const { cedula } = req.body;
-    
-    console.log(`[NoSQL] Verificando credenciales del Médico con Cédula: ${cedula}`);
-    
-    // Lógica para comprobar el código MSAS o la guardia activa...
-    res.redirect('/medico-dashboard.html');
+app.post('/api/medicos/registro', async (req, res) => {
+    const { nombreCompleto, cedulaProfesional, direccion, telefono, correo, contrasena } = req.body;
+    try {
+        const nuevoMedico = new Medico({ nombreCompleto, cedulaProfesional, direccion, telefono, correo, contrasena, autorizado: false });
+        await nuevoMedico.save();
+        res.send('<h1>Registro médico enviado. Espere a que el Administrador valide sus títulos y credenciales cargadas.</h1>');
+    } catch (err) {
+        res.status(500).send('Error en la postulación médica.');
+    }
+});
+
+app.post('/api/medicos/login', async (req, res) => {
+    const { correo, contrasena } = req.body;
+    try {
+        const med = await Medico.findOne({ correo, contrasena });
+        if (!med) return res.status(401).send('<h1>Usuario no encontrado</h1>');
+        if (!med.autorizado) return res.status(403).send('<h1>Acceso retenido: Sus títulos aún están en verificación por el administrador.</h1>');
+        
+        res.redirect('/medico-dashboard.html');
+    } catch (err) {
+        res.status(500).send('Error de autenticación.');
+    }
 });
 
 // =========================================================================
-// CONTROL DE ERRORES GENERAL (Ruta de respaldo si algo sale mal)
+// OPERACIONES DEL ROL: ADMINISTRADOR
 // =========================================================================
-app.use((req, res) => {
-    res.status(404).send('<h1>404 - Ruta no encontrada en el sistema NoSQL</h1>');
+
+app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body;
+    if (password === 'Admin') {
+        res.redirect('/admin.html');
+    } else {
+        res.status(401).send('<h1>Clave administrativa inválida</h1>');
+    }
 });
 
-// Iniciar el servidor en el puerto 3000
-const PUERTO = 3000;
-app.listen(PUERTO, () => {
-    console.log(`Servidor de Triaje Clínico corriendo en http://localhost:${PUERTO}`);
+// Listar médicos pendientes para aprobar
+app.get('/api/admin/medicos-pendientes', async (req, res) => {
+    const medicos = await Medico.find({ autorizado: false });
+    res.json(medicos);
 });
+
+// Aprobar médico
+app.post('/api/admin/aprobar-medico', async (req, res) => {
+    await Medico.findByIdAndUpdate(req.body.idMedico, { autorizado: true });
+    res.json({ success: true });
+});
+
+// CONSULTA DE ATENCIÓN DE TRIAJE
+app.post('/api/pacientes/solicitar-consulta', async (req, res) => {
+    const { idPaciente, sintomas } = req.body;
+    const pac = await Paciente.findById(idPaciente);
+    if (pac.estrellas < 1) {
+        return res.json({ success: false, redirigirAPago: true });
+    }
+    pac.estrellas -= 1;
+    pac.statusConsulta = 'Esperando';
+    pac.sintomasActuales = sintomas;
+    await pac.save();
+    res.json({ success: true });
+});
+
+app.get('/api/admin/pacientes', async (req, res) => {
+    const p = await Paciente.find();
+    res.json(p);
+});
+
+app.post('/api/medicos/atender', async (req, res) => {
+    const { idPaciente, recipeText } = req.body;
+    const p = await Paciente.findById(idPaciente);
+    const c = new Consulta({ idPaciente: p._id, sintomasReportados: p.sintomasActuales, diagnosticoTratamiento: recipeText });
+    await c.save();
+    p.statusConsulta = 'Atendido';
+    p.sintomasActuales = '';
+    await p.save();
+    res.json({ success: true });
+});
+
+app.listen(3000, () => console.log('🚀 Servidor unificado corriendo en puerto 3000'));

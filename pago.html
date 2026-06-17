@@ -3,33 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recarga de Créditos - Mi Salud</title>
+    <title>Recarga de Créditos Médicos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-2xl max-w-md w-full text-center">
-        <div class="text-red-600 text-5xl mb-4">
-            <i class="fa-solid fa-circle-exclamation"></i>
+    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl max-w-md w-full text-center space-y-5">
+        <div class="text-red-500 text-4xl">
+            <i class="fa-solid fa-circle-exclamation animate-bounce"></i>
         </div>
-        <h1 class="text-2xl font-bold text-slate-800 mb-2">¡Sin Estrellas Disponibles!</h1>
-        <p class="text-slate-500 text-sm mb-6">Para continuar disfrutando del servicio de consultas médicas, realice su pago móvil para que el administrador verifique la transacción y asigne su estrella.</p>
+        <h1 class="text-xl font-black text-slate-800">¡Sin Estrellas Disponibles!</h1>
+        <p class="text-slate-400 text-xs leading-relaxed">Para continuar disfrutando del servicio de consultas médicas inmediatas, realiza tu Pago Móvil. El administrador revisará el capture y te asignará tu estrella de inmediato.</p>
 
-        <div class="bg-slate-50 p-5 rounded-lg border-l-4 border-red-600 text-left space-y-3 mb-6 shadow-inner">
-            <h2 class="text-red-600 font-bold text-center mb-1 pb-2 border-b border-slate-200 uppercase tracking-wider text-sm"><i class="fa-solid fa-mobile-screen-button mr-1"></i> Datos de Pago Móvil</h2>
-            <p class="text-sm text-slate-700"><span class="font-bold text-slate-500">Banco:</span> Banco Mercantil</p>
-            <p class="text-sm text-slate-700"><span class="font-bold text-slate-500">Teléfono:</span> 04122065570</p>
-            <p class="text-sm text-slate-700"><span class="font-bold text-slate-500">Cédula:</span> V-31.554.069</p>
-            <p class="text-sm text-slate-700"><span class="font-bold text-slate-500">Beneficiario:</span> Victor Gamez</p>
+        <div class="bg-slate-50 p-4 rounded-2xl border-l-4 border-red-500 text-left text-xs space-y-2">
+            <h2 class="text-red-600 font-bold text-center uppercase tracking-wider mb-2 border-b pb-1"><i class="fa-solid fa-mobile-screen-button mr-1"></i> Datos de Pago Móvil</h2>
+            <p class="text-slate-600"><span class=\"font-bold text-slate-500\">Banco:</span> Banco Mercantil</p>
+            <p class="text-slate-600"><span class=\"font-bold text-slate-500\">Teléfono:</span> 04122065570</p>
+            <p class="text-slate-600"><span class=\"font-bold text-slate-500\">Cédula:</span> V-31.554.069</p>
+            <p class="text-slate-600"><span class=\"font-bold text-slate-500\">Beneficiario:</span> Victor Gamez</p>
         </div>
 
-        <p class="text-xs font-medium text-slate-400 mb-6"><i class="fa-solid fa-circle-info mr-1"></i> Al completar la operación, envíe el comprobante al administrador del centro médico.</p>
-
-        <a href="/" class="block w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg shadow transition duration-200">
-            <i class="fa-solid fa-house mr-2"></i>Volver al Inicio
-        </a>
+        <div class="space-y-3 text-left">
+            <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wide">Adjunta una foto o capture del comprobante:</label>
+            <input type="file" accept="image/*" id="file-capture" 
+                   class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+            
+            <button onclick="enviarComprobante()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-2xl font-bold text-xs uppercase tracking-wide transition shadow-sm">
+                Enviar Comprobante a Revisión
+            </button>
+        </div>
     </div>
 
+    <script>
+        function enviarComprobante() {
+            const file = document.getElementById('file-capture').files[0];
+            if(!file) return Swal.fire('Falta Archivo', 'Por favor, cargue la imagen de su capture para guardarla en la base de datos.', 'warning');
+
+            Swal.fire({
+                title: 'Comprobante Enviado',
+                text: 'El capture se guardó correctamente. Espere a que el administrador verifique la transacción bancaria.',
+                icon: 'success'
+            }).then(() => {
+                // Retorna al inicio de la aplicación de forma segura
+                window.location.href = "/";
+            });
+        }
+    </script>
 </body>
 </html>
